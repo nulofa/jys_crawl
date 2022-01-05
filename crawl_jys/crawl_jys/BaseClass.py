@@ -57,7 +57,7 @@ class BaseCrawl():
         search_xpath = search_xpath
         self.default_handle = self.browser.current_window_handle
 
-        for keyword in BaseCrawl.keywords[:2]:
+        for keyword in BaseCrawl.keywords[1:]:
             # gz_kjt的弹窗
             if self.name == 'gz_kjt' and len(self.browser.find_elements_by_xpath("//div[@id='LAY_layuipro']")) > 0:
                 self.browser.find_element_by_xpath(
@@ -100,10 +100,14 @@ class BaseCrawl():
 
         res = []
         for item in self.items:
-            # if self.rds.get(item['url']):
-            #     continue
-            # self.rds.set(item['url'],1)
-            # res.append(item)
+            if self.rds.get(item['url']):
+                continue
+            if self.rds.get(self.name+"."+ item['title']):
+                continue
+
+            self.rds.set(item['url'],1)
+            self.rds.set(self.name +"."+ item['title'],1)
+            res.append(item)
             pass
         self.rds.close()
         return res
@@ -157,7 +161,12 @@ class BaseCrawl():
                 news_date = [i for i in map(lambda x: int(x), news_date)]
                 nDate = datetime.date(news_date[0], news_date[1], news_date[2])
                 if nDate >= thred:
-                    content = new.find_elements_by_xpath(content_xp)[0]
+
+                    if self.name == 'xhs': # 新华社的进行特殊处理
+                        self.special_process(keyword, new,content_xp, url_xp,title_xp, nDate)
+                        continue
+                    else:
+                        content = new.find_elements_by_xpath(content_xp)[0]
                     if keyword in content.text:
                         item = CrawlJysItem()
                         item['date'] = str(nDate)
@@ -181,6 +190,9 @@ class BaseCrawl():
         pass
 
     def process_date(self, new, date_xp):
+        pass
+
+    def special_process(self, keyword,new, content_xp, url_xp, title_xp, nDate):
         pass
 
     def get_real_url(self, url):
