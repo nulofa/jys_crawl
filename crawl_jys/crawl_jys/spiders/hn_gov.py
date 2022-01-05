@@ -43,6 +43,7 @@ class HnGovSpider(scrapy.Spider, BaseCrawl):
     def process_item(self, new, item, title_xp, url_xp):
         item['title'] = new.find_element_by_xpath(title_xp).get_attribute("title")
         item['url'] = new.find_element_by_xpath(url_xp).get_attribute("href")
+        item['source'] = '海南政府网'
 
     def process_date(self, new, date_xp): # 返回[年，月，日]，如: 2021-12-12 则返回[2012,12,12]
         res = new.find_elements_by_xpath(date_xp)

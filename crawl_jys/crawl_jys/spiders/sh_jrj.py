@@ -83,6 +83,7 @@ class ShJrjSpider(scrapy.Spider, BaseCrawl):
         item['title'] = new.find_element_by_xpath(title_xp).text
         item['url'] = self.get_real_url(new.find_element_by_xpath(url_xp).get_attribute("href"))
 
+        item['source'] = '上海金融局'
 
     def process_date(self, new, date_xp):
         date_text = new.find_elements_by_xpath(date_xp)[0].text

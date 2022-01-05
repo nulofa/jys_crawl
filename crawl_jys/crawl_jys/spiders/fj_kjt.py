@@ -80,6 +80,7 @@ class FjKjtSpider(scrapy.Spider, BaseCrawl):
     def process_item(self, new, item, title_xp, url_xp):
         item['title'] = new.find_element_by_xpath(title_xp).get_attribute("title")
         item['url'] = self.get_real_url(new.find_element_by_xpath(url_xp).get_attribute("href"))
+        item['source'] = '福建科技厅'
 
     def process_date(self, new, date_xp):
         date_text = new.find_elements_by_xpath(date_xp)[0].text
