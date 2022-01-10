@@ -12,7 +12,7 @@ from crawl_jys.items import CrawlJysItem
 
 
 class BaseCrawl():
-    keywords = ["农村产权", "要素交易场所", "产权交易所", "股权交易中心", "文化产权", "碳排放权", "交易市场建设","知识产权交易"]
+    keywords = ["农村产权", "要素交易场所", "产权交易所", "股权交易中心", "文化产权", "碳排放权", "交易市场建设","知识产权交易", "数据交易","技术交易","交易场所","交易中心", "金融资产交易"]
     date_limit = 60
     max_page = 30
     timeout = 7
@@ -57,7 +57,7 @@ class BaseCrawl():
         search_xpath = search_xpath
         self.default_handle = self.browser.current_window_handle
 
-        for keyword in BaseCrawl.keywords[1:]:
+        for keyword in BaseCrawl.keywords[:]:
             # gz_kjt的弹窗
             if self.name == 'gz_kjt' and len(self.browser.find_elements_by_xpath("//div[@id='LAY_layuipro']")) > 0:
                 self.browser.find_element_by_xpath(

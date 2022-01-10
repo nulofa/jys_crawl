@@ -1,65 +1,74 @@
-
+# -*- coding: utf-8 -*-
+import datetime
 import random
 import time
+
+import redis
 import scrapy
+from urllib.parse import unquote,quote
 from crawl_jys.BaseClass import BaseCrawl
+from scrapy import Request
 
-class ShZqbSpider(scrapy.Spider, BaseCrawl):
+from crawl_jys.items import CrawlJysItem
+
+
+class ShZqbSpider(scrapy.Spider):
     name = 'sh_zqb'
-    start_urls = ['https://www.cnstock.com']
-
-    def __init__(self):
-        scrapy.Spider.__init__(self)
-        BaseCrawl.__init__(self)
-        self.cur_page = 1
-        self.max_page = 5
+    start_urls = ['https://search.cnstock.com/']
+    keywords = BaseCrawl.keywords
+    thred = datetime.date.today() - datetime.timedelta(BaseCrawl.date_limit)
+    myPool = redis.ConnectionPool(host='192.168.12.233', port=6379, db=2)
+    rds = redis.Redis(connection_pool=myPool)
 
     def parse(self, response):
-        input_xpath = '//*[@id="nav_keywords"]'
-        search_xpath = "//form[@name='navsearch_form']//input[@type='submit']"
-        items = super(ShZqbSpider, self).myParse(response, input_xpath, search_xpath)
+        for keyword in ShZqbSpider.keywords[:]:
+            keyword_str = quote(keyword, "utf-8")
+            time.sleep(random.random())
+            yield Request(response.url+"go.aspx?q="+keyword_str, callback=self.my_parse)
+
+    def my_parse(self, res):
+        keyword_str = res.url.split("=")[1]
+        keyword = unquote(keyword_str, encoding='utf-8')
+        contents = res.xpath("//div[@class='result-article']")
+        items = []
+        for content in contents:
+            cont = content.xpath("./p[@class='des']").xpath("string(.)").extract_first()
+            if keyword in cont:
+                url_date = content.xpath(".//span[@class='g']/text()").extract_first().replace('\xa0',' ').split(" ")
+                url = url_date[0]
+                date = url_date[1]
+                news_date = [i for i in map(lambda x: int(x), date.split('-'))]
+                nDate = datetime.date(news_date[0], news_date[1], news_date[2])
+
+                if nDate > self.thred:
+                    title = content.xpath(".//a/text()").extract_first()
+                    item = CrawlJysItem()
+                    item['url'] = url
+                    item['title'] = title
+                    item['source'] = '上海证券报'
+                    item['content'] = cont
+                    item['date'] = str(nDate)
+                    item['keyword'] = keyword
+                    items.append(item)
+
         for item in items:
+            if self.rds.get(item['url']):
+                continue
+            if self.rds.get(self.name + "." + item['title']):
+                continue
+
+            self.rds.set(item['url'], 1)
+            self.rds.set(self.name + "." + item['title'], 1)
             yield item
 
-    def myGetData(self, keyword):
-        time.sleep(7+random.random())
-        wait2_xp = "//div[@class='result-article']"  # 等待第一页搜索结果的出现, 无特殊情况可设置与news_xp一样
-        wait3_xp = "//div[@class='result-article']"  # 等待每一页的搜索结果的出现, 无特殊情况可设置与news_xp一样
-        news_xp = "//div[@class='result-article']"
-        date_xp = "./p/span"
-        content_xp = "./p[@class='des']"
-        title_xp = "./h3/a"
-        url_xp = "./h3/a"
-        next_xp = "//div[@class='pagination pagination-centered']//li[last()]"
-        super(ShZqbSpider, self).get_data(keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp,
-                                          title_xp, url_xp, next_xp)
-
-    def time_select(self):
-        pass
-
-    def click_next(self, next_xp):
-        has_next = True
-        try:
-            next = self.get_element_by_xpath(next_xp)
-            if self.cur_page < self.max_page:
-                time.sleep(1+random.random())
-                next.click()
-                self.cur_page += 1
-            else:
-                self.cur_page = 1
-                return False
+        try: # 尝试下一页
+            next_url = res.xpath("//div[@class='pagination pagination-centered']//li[last()]/a/@href").extract_first()
+            if next_url.startswith("http"):
+                time.sleep(random.random())
+                yield Request(next_url, self.my_parse)
         except Exception as e:
-            print("点击下一页发生错误: \n", e)
-            self.cur_page = 1
-            has_next = False
-        return has_next
+            print("没有下一页", e)
 
-    def process_item(self, new, item, title_xp, url_xp):
-        item['title'] = new.find_element_by_xpath(title_xp).text
-        item['url'] = new.find_element_by_xpath(url_xp).get_attribute("href")
-        item['source'] = '上海证券报'
 
-    def process_date(self, new, date_xp): # 返回[年，月，日]，如: 2021-12-12 则返回[2012,12,12]
-        date_text = new.find_elements_by_xpath(date_xp)[0].text.split(" ")[1]
-        return date_text.split("-")
+
 

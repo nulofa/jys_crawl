@@ -40,14 +40,14 @@ class CrawlJysPipeline:
 class CrawlJysPipeline2es:
     # This method is called when the spider is opened.
     def open_spider(self, spider):
-        # self.es = Elasticsearch("http://192.168.12.233:9200", http_auth=('elastic', 'apexes'))
+        self.es = Elasticsearch("http://192.168.12.233:9200", http_auth=('elastic', 'apexes'))
         self.cnt_es = 0
 
     def process_item(self, item, spider):
-        # print("es: item = ", item)
-        # item = dict(item)
-        # self.es.index(index="jys_msgs", doc_type="_doc", body=item)
-        # self.cnt_es += 1
+        print("es: item = ", item)
+        item = dict(item)
+        self.es.index(index="jys_msgs", doc_type="_doc", body=item)
+        self.cnt_es += 1
         return item
 
     #This method is called when the spider is closed.
