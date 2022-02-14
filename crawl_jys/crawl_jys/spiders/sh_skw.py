@@ -40,11 +40,18 @@ class ShSkwSpider(scrapy.Spider, BaseCrawl):
 
         if self.part == 1:
             # 选择单位：市科委
-            self.waitor2("//div[@id='layui-layer-shade1']")
+            try:
+                self.waitor2("//div[@id='layui-layer-shade1']")
+            except:
+                pass
             self.waitor("//div[@id='results']")
             time.sleep(1)
-            self.browser.find_elements_by_xpath("//a[@tabindex='0']")[1].click()
-            time.sleep(1)
+            try:
+                self.browser.find_elements_by_xpath('//*[@id="siteLocate"]')[0].click()
+                self.waitor("//div[@class='modal-content']")
+            except:
+                self.browser.find_elements_by_xpath('//*[@id="siteLocate"]')[0].click()
+                self.waitor("//div[@class='modal-content']")
             self.get_element_by_xpath("//a[@data-code='stcsm.sh.gov.cn']").click()
             time.sleep(1)
             # 在《要闻动态》下搜索
@@ -60,9 +67,17 @@ class ShSkwSpider(scrapy.Spider, BaseCrawl):
 
         time.sleep(2)
         # 时间范围选择一年内
-        self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']").click()
+        try:
+            self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']",
+                                      "//div[@id='layui-layer-shade5']",
+                                      "//div[@id='layui-layer-shade3']").click()
+        except:
+            time.sleep(2)
+            self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']",
+                                      "//div[@id='layui-layer-shade5']",
+                                      "//div[@id='layui-layer-shade3']").click()
 
-        self.get_element_by_xpath("//a[@data-filter-value='4']", "//div[@id='layui-layer-shade5']").click()
+        self.get_element_by_xpath("//a[@data-filter-value='3']", "//div[@id='layui-layer-shade5']").click()
 
         for i in range(5):
             try:

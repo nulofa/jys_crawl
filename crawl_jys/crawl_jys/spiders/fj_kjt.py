@@ -35,7 +35,7 @@ class FjKjtSpider(scrapy.Spider, BaseCrawl):
         time.sleep(2)
         self.get_element_by_xpath("//span[@id='siteSelect']").click()
         self.get_element_by_xpath("//ul[@id='BMDWLIST']//a[@siteid='ff8080816e59baf3016e5e6a8c9c3e73']").click()
-        self.get_element_by_xpath("//input[@onclick='searchBean.closeModal()']").click()
+        # self.get_element_by_xpath("//input[@onclick='searchBean.closeModal()']").click()
 
         self.waitor("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']")  # 等待搜索工具的出现
         self.get_element_by_xpath("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']",

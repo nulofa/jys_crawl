@@ -35,8 +35,12 @@ class GzGzwSpider(scrapy.Spider, BaseCrawl):
         time_xp = "//div[@class='search_filter_item search_filter_item_time js_search_filter_item_time']/span"  # 点击 时间选择器
         time_xp2 = "//div[@class='btn js_time_btn']"  # 确定按钮
         self.waitor(wait1_xp)
-        self.browser.find_elements_by_xpath(time_xp)[-1].click()
-        self.waitor("//div[@class='time_list js_time_list']")
+        try:
+            self.browser.find_elements_by_xpath(time_xp)[-1].click()
+            self.waitor("//div[@class='time_list js_time_list']")
+        except Exception as e:
+            self.browser.find_elements_by_xpath(time_xp)[-1].click()
+            self.waitor("//div[@class='time_list js_time_list']")
 
         self.get_element_by_xpath("//input[@id='startTime']").click()
         self.waitor('//*[@id="layui-laydate1"]')  # 等待日历出现

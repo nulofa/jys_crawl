@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 import pymysql
 import redis
 from elasticsearch import Elasticsearch
@@ -17,8 +19,9 @@ class CrawlJysPipeline:
 
     def process_item(self, item, spider):
         print("mysql: item = ", item)
-        insert_sql = 'insert into message values(null, "%s","%s", "%s", "%s", "%s", "%s")'\
-                     % (item['date'],item['source'],item['keyword'], item['title'], item['content'], item['url'])
+        crawl_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        insert_sql = 'insert into message values(null, "%s","%s", "%s", "%s", "%s", "%s", "%s")'\
+                     % (item['date'],item['source'],item['keyword'], item['title'], item['content'], item['url'], crawl_time)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(insert_sql)

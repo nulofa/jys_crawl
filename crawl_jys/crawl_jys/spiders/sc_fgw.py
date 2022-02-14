@@ -5,16 +5,17 @@ from crawl_jys.BaseClass import BaseCrawl
 
 class ScFgwSpider(scrapy.Spider, BaseCrawl):
     name = 'sc_fgw'
-    start_urls = ['http://fgw.sc.gov.cn']
+    start_urls = ['http://fgw.sc.gov.cn/guestweb4/s?uc=1&siteCode=5100000018&column=%E5%85%A8%E9%83%A8']
+    max_page = 3
 
     def __init__(self):
         scrapy.Spider.__init__(self)
         BaseCrawl.__init__(self)
 
     def parse(self, response):
-        input_xpath = '//*[@id="searchWord"]'
-        search_xpath = "//input[@type='submit']"
-        items = super(ScFgwSpider, self).myParse(response, input_xpath, search_xpath)
+        input_xpath = '//*[@id="allSearchWord"]'
+        search_xpath = '//*[@id="btnSearch"]'
+        items = super(ScFgwSpider, self).myParse(response, input_xpath, search_xpath, "//*[@id='allContent']//div[@class='results-list clearfix']/p/span")
         for item in items:
             yield item
 
@@ -49,6 +50,8 @@ class ScFgwSpider(scrapy.Spider, BaseCrawl):
     def click_next(self, next_xp):
         pre_of_next = self.get_element_by_xpath('//*[@id="pageInfo"]/li[last()-1]/a').text
         cur_page = self.get_element_by_xpath('//*[@id="pageInfo"]/li[@class="page active"]/a').text
+        if int(cur_page) > self.max_page:
+            return False
         flg = pre_of_next != cur_page
         self.get_element_by_xpath(next_xp).click()
         return flg

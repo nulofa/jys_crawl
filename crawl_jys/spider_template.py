@@ -4,6 +4,7 @@ import random
 import time
 import scrapy
 from crawl_jys.BaseClass import BaseCrawl
+from scrapy import Request
 
 class %s(scrapy.Spider, BaseCrawl):
     name = '%s'
@@ -13,7 +14,10 @@ class %s(scrapy.Spider, BaseCrawl):
         scrapy.Spider.__init__(self)
         BaseCrawl.__init__(self)
         self.cur_page = 1
-        self.max_page = 5
+        self.max_page = 3
+
+    def start_requests(self):
+        yield Request(url=self.start_urls[0], callback=self.parse, dont_filter=True)
 
     def parse(self, response):
         input_xpath = ""
@@ -39,8 +43,12 @@ class %s(scrapy.Spider, BaseCrawl):
         time_xp = "" # 点击 时间选择器
         time_xp2 = ""  # 时间选择需要 两次点击才能确定
         self.waitor(wait1_xp)
-        self.browser.find_elements_by_xpath(time_xp)[-1].click()
-        time.sleep(1)
+        try:
+            self.browser.find_elements_by_xpath(time_xp)[-1].click()
+            self.waitor(time_xp2)
+        except:
+            self.browser.find_elements_by_xpath(time_xp)[-1].click()
+            self.waitor(time_xp2)
         self.get_element_by_xpath(time_xp2).click()
         time.sleep(1)
 

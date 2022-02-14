@@ -32,7 +32,8 @@ class GdFgwSpider(scrapy.Spider, BaseCrawl):
 
     def time_select(self):
         #选择发改委
-        self.waitor("//div[@class='total-line']")
+
+        self.waitor("//div[@class='list-part']")
         self.get_element_by_xpath("//span[@id='pickRange']").click()
         self.waitor("//div[@class='item-box']")
         self.get_element_by_xpath("//div[@class='item-box']//div[@class='item-list']/span[@data-id='135']").click()

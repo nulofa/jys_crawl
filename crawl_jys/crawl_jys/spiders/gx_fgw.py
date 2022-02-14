@@ -31,10 +31,14 @@ class GxFwgSpider(scrapy.Spider, BaseCrawl):
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
+
         wait1_xp = "//div[@class='totolLi']"  # 等待结果出现
         time_xp = "//div[@class='el-date-editor el-range-editor el-input__inner el-date-editor--daterange el-range-editor--mini']"  # 点击 时间选择器
         time_xp2 = "//div[@class='el-picker-panel__body-wrapper']/div/button[last()]"  # 时间选择需要 两次点击才能确定
-        self.waitor(wait1_xp)
+        try:
+            self.waitor(wait1_xp)
+        except:
+            self.waitor(wait1_xp)
         self.browser.find_elements_by_xpath(time_xp)[-1].click()
         time.sleep(1)
         self.get_element_by_xpath(time_xp2).click()

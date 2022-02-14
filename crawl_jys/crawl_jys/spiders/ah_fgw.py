@@ -7,6 +7,7 @@ from crawl_jys.BaseClass import BaseCrawl
 class AhFgwSpider(scrapy.Spider, BaseCrawl):
     name = 'ah_fgw'
     start_urls = ['http://fzggw.ah.gov.cn']
+    max_page = 3
     
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -17,6 +18,7 @@ class AhFgwSpider(scrapy.Spider, BaseCrawl):
         search_xpath = "//div[@class='search fl']//input[@name='input']"
         wait_xp = "//div[@class='searchlistw']/ul[@class='search-list']"
         items = super(AhFgwSpider, self).myParse(response, input_xpath,search_xpath,wait_xp)
+
         for item in items:
             print(item)
 
@@ -43,7 +45,7 @@ class AhFgwSpider(scrapy.Spider, BaseCrawl):
         cur_page = self.browser.find_element_by_xpath("//div[@id='page_new']/span[@class='current']").text
         try:
             next = self.browser.find_elements_by_xpath(next_xp)[-2]
-            if next.text == '下一页' and BaseCrawl.max_page > int(cur_page):
+            if next.text == '下一页' and self.max_page > int(cur_page):
                 next.click()
             else:
                 has_next = False

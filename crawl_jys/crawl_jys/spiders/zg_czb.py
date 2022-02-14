@@ -39,7 +39,11 @@ class ZgCzbSpider(scrapy.Spider, BaseCrawl):
         self.waitor("//div[@class='select_box']/span")
         self.browser.find_element_by_xpath("//div[@class='label-g']//input[@value='正文']").click()
         time.sleep(1 + random.random())
-        self.browser.find_element_by_xpath("//div[@class='anniu']//img").click()
+        try:
+            self.browser.find_element_by_xpath("//div[@class='anniu']//a").click()
+        except:
+            time.sleep(2)
+            self.browser.find_element_by_xpath("//div[@class='anniu']//a").click()
 
         # 选择 按时间排序
         self.waitor("//div[@class='select_box']/span")

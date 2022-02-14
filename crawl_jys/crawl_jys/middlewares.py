@@ -4,8 +4,18 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import json
+from logging import getLogger
 
 from scrapy import signals
+from scrapy.http import HtmlResponse
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import FirefoxProfile, DesiredCapabilities, Firefox
+
+from crawl_jys.BaseClass import BaseCrawl
 
 
 class CrawlJysSpiderMiddleware:
@@ -101,3 +111,45 @@ class CrawlJysDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class SeleniumMiddleware():
+    def __init__(self, timeout=None, service_args=[]):
+        self.logger = getLogger(__name__)
+        profile = FirefoxProfile()
+        profile.set_preference('devtools.jsonview.enabled', False)
+        profile.set_preference("dom.webdriver.enabled", False)
+        profile.set_preference('useAutomationExtension', False)
+
+        profile.set_preference('permissions.default.image', 2)
+        profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+        # profile.set_preference('javascript.enabled', 'false')
+        profile.update_preferences()
+        options = webdriver.FirefoxOptions()
+        options.add_argument('-headless')     #取消注释则以无界面形式启动
+        desired = DesiredCapabilities.FIREFOX
+        self.browser = Firefox(firefox_profile=profile, desired_capabilities=desired,
+                               executable_path='./geckodriver',
+                               options=options)
+        BaseCrawl.browser= self.browser
+
+    def __del__(self):
+        if self.browser != None:
+            self.browser.close()
+
+    def process_request(self, request, spider):
+        """
+        用 firefox 抓取页面
+        :param request: Request 对象
+        :param spider: Spider 对象
+        :return: HtmlResponse
+        """
+        self.logger.debug('firefox is Starting')
+        try:
+            self.browser.get(request.url)
+            return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8', status=200)
+        except TimeoutException:
+            return HtmlResponse(url=request.url, status=500, request=request)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls()

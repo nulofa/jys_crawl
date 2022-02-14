@@ -40,13 +40,14 @@ class AhJrjSpider(scrapy.Spider, BaseCrawl):
         self.waitor(wait_xp)
         self.get_element_by_xpath(wait_xp).click()
         self.waitor2(wait_xp2)
+        self.waitor("//div[@class='main']")
+        time_xp = "//div[@class='dropdown']/a"  # 点击 时间选择器
+        wait1_xp = "//ul[@class='dropdown-menu timeRange']"  # 等待《时间选择器》的出现
+        time_xp2 = "//li[@role='presentation']/a[@tr=3]"  # 时间选择需要 两次点击才能确定
 
-        wait1_xp = "//label[@id='dropdownMenu1']"  # 等待《时间选择器》的出现
-        time_xp = "//label[@id='dropdownMenu1']"  # 点击 时间选择器
-        time_xp2 = "//li[@role='presentation']/a[@tr=4]"  # 时间选择需要 两次点击才能确定
-        self.waitor(wait1_xp)
         self.browser.find_elements_by_xpath(time_xp)[-1].click()
-        time.sleep(2)
+        self.waitor(wait1_xp)
+        time.sleep(1)
         self.get_element_by_xpath(time_xp2).click()
         time.sleep(1)
 

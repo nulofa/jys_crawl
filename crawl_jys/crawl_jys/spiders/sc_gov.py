@@ -7,6 +7,7 @@ from crawl_jys.BaseClass import BaseCrawl
 class ScGovSpider(scrapy.Spider, BaseCrawl):
     name = 'sc_gov'
     start_urls = ['http://www.sc.gov.cn']
+    max_page = 3
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -34,11 +35,15 @@ class ScGovSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
 
         wait1_xp = '//*[@id="time"]'  # 等待《时间选择器》的出现
-        time_xp = '//*[@id="time"]'  # 点击 时间选择器
+        time_xp = '//*[@id="time"]//i'  # 点击 时间选择器
         time_xp2 = "//a[@onclick='customTime()']"  # 时间选择需要 两次点击才能确定
         self.waitor(wait1_xp)
         self.get_element_by_xpath(time_xp).click()
-        self.waitor("//ul[@id='timeRange_downSelect']")
+        try:
+            self.waitor("//ul[@id='timeRange_downSelect']")
+        except:
+            self.get_element_by_xpath(time_xp).click()
+            self.waitor("//ul[@id='timeRange_downSelect']")
 
         self.get_element_by_xpath('//*[@id="startDate"]').send_keys(
             str(datetime.date.today() - datetime.timedelta(BaseCrawl.date_limit)))
@@ -51,6 +56,8 @@ class ScGovSpider(scrapy.Spider, BaseCrawl):
     def click_next(self, next_xp):
         pre_of_next = self.get_element_by_xpath('//*[@id="pageInfo"]/li[last()-1]/a').text
         cur_page = self.get_element_by_xpath('//*[@id="pageInfo"]/li[@class="page active"]/a').text
+        if int(cur_page) > self.max_page:
+            return False
         flg = pre_of_next != cur_page
         self.get_element_by_xpath(next_xp).click()
         return flg

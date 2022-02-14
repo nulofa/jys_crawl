@@ -6,6 +6,8 @@ from crawl_jys.BaseClass import BaseCrawl
 class FjJrjSpider(scrapy.Spider, BaseCrawl):
     name = 'fj_jrj'
     start_urls = ['http://fj.gov.cn']
+    cur_page =1
+    max_page = 3
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -34,9 +36,13 @@ class FjJrjSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
         # 选择站点《金融局》, 先等待搜索结果的出现
         time.sleep(2)
-        self.get_element_by_xpath("//span[@id='siteSelect']").click()
+        try:
+            self.get_element_by_xpath("//span[@id='siteSelect']","//div[@id='layui-layer-shade100001']").click()
+        except Exception as e:
+            time.sleep(2)
+            self.get_element_by_xpath("//span[@id='siteSelect']").click()
         self.get_element_by_xpath("//ul[@id='BMDWLIST']//a[@siteid='ff8080816e59baf3016e5e79a968421a']").click()
-        self.get_element_by_xpath("//input[@onclick='searchBean.closeModal()']").click()
+        # self.get_element_by_xpath("//input[@onclick='searchBean.closeModal()']").click()
 
         self.waitor("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']")  # 等待搜索工具的出现
         self.get_element_by_xpath("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']",
@@ -73,6 +79,10 @@ class FjJrjSpider(scrapy.Spider, BaseCrawl):
         has_next = True
         try:
             next = self.get_element_by_xpath(next_xp)
+            if (self.cur_page  == self.max_page):
+                self.cur_page = 1
+                return False
+            self.cur_page += 1
             next.click()
         except:
             has_next = False

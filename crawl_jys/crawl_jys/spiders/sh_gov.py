@@ -1,4 +1,5 @@
 import datetime
+import random
 import time
 import scrapy
 from crawl_jys.BaseClass import BaseCrawl
@@ -51,13 +52,18 @@ class ShGovSpider(scrapy.Spider, BaseCrawl):
                 self.get_element_by_xpath("//li[@data-channel='xxgk']", "//div[@id='layui-layer-shade2']").click()
             self.part = 1
 
-        time.sleep(2)
         # 时间范围选择一年内
-        self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']",
+        try:
+            self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']",
                                   "//div[@id='layui-layer-shade5']",
                                   "//div[@id='layui-layer-shade3']").click()
+        except:
+            time.sleep(2+random.random())
+            self.get_element_by_xpath("//a[@id='drop6']", "//div[@id='layui-layer-shade2']",
+                                      "//div[@id='layui-layer-shade5']",
+                                      "//div[@id='layui-layer-shade3']").click()
 
-        self.get_element_by_xpath("//a[@data-filter-value='4']", "//div[@id='layui-layer-shade5']").click()
+        self.get_element_by_xpath("//a[@data-filter-value='3']", "//div[@id='layui-layer-shade5']").click()
         # 再改变时间范围。前1~365天
         thred = datetime.date.today() - datetime.timedelta(ShGovSpider.date_limit)
         for i in range(5):

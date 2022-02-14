@@ -31,6 +31,7 @@ class ZjJrjSpider(scrapy.Spider, BaseCrawl):
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
+        self.waitor('//*[@id="infocount"]')
         self.get_element_by_xpath("//div[@class='TimeType lf']/p[@class='textWrap']").click()
         self.waitor("//div[@class='TimeTypeList']")
 

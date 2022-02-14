@@ -34,8 +34,11 @@ class ZgFgwSpider(scrapy.Spider, BaseCrawl):
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
+        try:
+            self.waitor('//*[@id="loading"]')
+        except:
+            pass
         self.waitor2('//*[@id="loading"]')
-
         time_xp = '//*[@id="timesSpanId"]' # 点击 时间选择器
         self.browser.find_element_by_xpath(time_xp).click()
         try:
@@ -56,11 +59,12 @@ class ZgFgwSpider(scrapy.Spider, BaseCrawl):
         time.sleep(1)
 
         # 设置结束日期
-        self.get_element_by_xpath('//*[@id="utimejsrq"]').click()
-        self.waitor('//*[@id="layui-laydate6"]')  # 等待日历出现
-        self.get_element_by_xpath("//div[@class='laydate-footer-btns']/span[@class='laydate-btns-confirm']").click()
+        # self.get_element_by_xpath('//*[@id="utimejsrq"]').click()
+        # self.waitor('//*[@id="layui-laydate6"]')  # 等待日历出现
+        # self.get_element_by_xpath("//div[@class='laydate-footer-btns']/span[@class='laydate-btns-confirm']").click()
 
         # 确定时间范围
+        time.sleep(random.random()) #等待日历消失
         time_xp2 = "//*[@id='times']/li/input[@type='button']"
         self.get_element_by_xpath(time_xp2).click()
         self.waitor2('//*[@id="loading"]')

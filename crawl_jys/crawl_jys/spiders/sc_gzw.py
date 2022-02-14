@@ -6,6 +6,7 @@ from crawl_jys.BaseClass import BaseCrawl
 class ScGzwSpider(scrapy.Spider, BaseCrawl):
     name = 'sc_gzw'
     start_urls = ['http://gzw.sc.gov.cn/guestweb4/index/5100000052']
+    max_page = 3
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -49,6 +50,8 @@ class ScGzwSpider(scrapy.Spider, BaseCrawl):
     def click_next(self, next_xp):
         pre_of_next = self.get_element_by_xpath('//*[@id="pageInfo"]/li[last()-1]/a').text
         cur_page = self.get_element_by_xpath('//*[@id="pageInfo"]/li[@class="page active"]/a').text
+        if int(cur_page) > self.max_page:
+            return False
         flg = pre_of_next != cur_page
         self.get_element_by_xpath(next_xp).click()
         return flg

@@ -7,7 +7,7 @@ class GzGovSpider(scrapy.Spider, BaseCrawl):
     name = 'gz_gov'
     start_urls = ['http://guizhou.gov.cn']
     cur_page = 1
-    max_page = 5
+    max_page = 1
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -33,6 +33,13 @@ class GzGovSpider(scrapy.Spider, BaseCrawl):
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
+        try:
+            self.waitor("//div[@class='seach_result_num js_seach_result_num']/span")
+            self.get_element_by_xpath("//span[@data-checked='time']").click()
+            self.waitor("//div[@class='seach_result_num js_seach_result_num']/span")
+        except:
+            print("time sort failed....")
+            self.max_page = 5
         return  # gz_gov的时间选择有问题
         wait1_xp = "//div[@class='search_filter_item search_filter_item_time js_search_filter_item_time']/span"  # 等待《时间选择器》的出现
         time_xp = "//div[@class='search_filter_item search_filter_item_time js_search_filter_item_time']/span"  # 点击 时间选择器

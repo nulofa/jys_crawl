@@ -33,8 +33,13 @@ class FjGovSpider(scrapy.Spider, BaseCrawl):
 
     def time_select(self):
         self.waitor("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']")  # 等待搜索工具的出现
-        self.get_element_by_xpath("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']",
+        try:
+            self.get_element_by_xpath("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']",
                                   "//div[@id='layui-layer-shade100002']").click()
+        except:
+            time.sleep(2)
+            self.get_element_by_xpath("//span[@id='searchTool']/a[@class='ss_ssgj b-free-read-leaf']",
+                                      "//div[@id='layui-layer-shade100002']").click()
 
         wait1_xp = "//span[@id='timeSelectContent']/a[@onclick='searchBean.timeSearchShow()']"  # 等待《时间选择器》的出现
         time_xp = "//span[@id='timeSelectContent']/a[@onclick='searchBean.timeSearchShow()']"  # 点击 时间选择器
@@ -79,5 +84,9 @@ class FjGovSpider(scrapy.Spider, BaseCrawl):
 
     def process_date(self, new, date_xp):
         date_text = new.find_elements_by_xpath(date_xp)[0].text
+        try:
+            [int(x) for x in date_text.split(' ')[0].replace("年","-").replace("月","-").replace("日","").split("-")]
+        except:
+            return ["1970", "01", "01"]
         return date_text.split(' ')[0].replace("年","-").replace("月","-").replace("日","").split("-")
 

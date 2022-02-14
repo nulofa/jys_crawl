@@ -15,7 +15,7 @@ class XhsSpider(scrapy.Spider, BaseCrawl):
         scrapy.Spider.__init__(self)
         BaseCrawl.__init__(self)
         self.cur_page = 1
-        self.max_page = 10
+        self.max_page = 3
 
     def parse(self, response):
         input_xpath = '//*[@id="inputwd"]'

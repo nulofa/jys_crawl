@@ -7,15 +7,25 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
-from selenium.webdriver import FirefoxProfile, DesiredCapabilities,Firefox
+from selenium.webdriver import ChromeOptions, FirefoxProfile, DesiredCapabilities, Firefox
 from crawl_jys.items import CrawlJysItem
 
 
 class BaseCrawl():
-    keywords = ["农村产权", "要素交易场所", "产权交易所", "股权交易中心", "文化产权", "碳排放权", "交易市场建设","知识产权交易", "数据交易","技术交易","交易场所","交易中心", "金融资产交易"]
+    keywords = ["农村产权流转交易", "文化产权", "碳排放权交易","知识产权交易", "数据交易","技术交易","交易场所", "金融资产交易","区域股权","要素市场","产权交易"]
     date_limit = 60
-    max_page = 30
+    max_page = 3
     timeout = 7
+    browser = None
+    # def myGet(self, url):
+    #     self.browser.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+    #         "source": """
+    #                 Object.defineProperty(navigator, 'webdriver', {
+    #                   get: () => undefined
+    #                 })
+    #               """
+    #     })
+    #     self.browser.get(url)
 
     def get_sleeptime(self):
         return random.random() + 1
@@ -35,17 +45,32 @@ class BaseCrawl():
             (By.XPATH, xp)))
 
     def __init__(self, **kwargs):
-        profile = FirefoxProfile()
-        profile.set_preference('devtools.jsonview.enabled', False)
-        profile.set_preference("dom.webdriver.enabled", False)
-        profile.set_preference('useAutomationExtension', False)
-        profile.update_preferences()
-        options = webdriver.FirefoxOptions()
-        # options.add_argument('-headless')     #取消注释则以无界面形式启动
-        desired = DesiredCapabilities.FIREFOX
-        self.browser = Firefox(firefox_profile=profile, desired_capabilities=desired,
-                               executable_path='../geckodriver.exe',
-                               options=options)
+        # firefox
+        # profile = FirefoxProfile()
+        # profile.set_preference('devtools.jsonview.enabled', False)
+        # profile.set_preference("dom.webdriver.enabled", False)
+        # profile.set_preference('useAutomationExtension', False)
+        #
+        # profile.set_preference('permissions.default.image', 2)
+        # profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+        # # profile.set_preference('javascript.enabled', 'false')
+        #
+        # profile.update_preferences()
+        # options = webdriver.FirefoxOptions()
+        # # options.add_argument('-headless')     #取消注释则以无界面形式启动
+        # desired = DesiredCapabilities.FIREFOX
+        # self.browser = Firefox(firefox_profile=profile, desired_capabilities=desired,
+        #                        executable_path='./geckodriver',
+        #                        options=options)
+
+        # option = ChromeOptions()  // chrome
+        # prefs = {"profile.managed_default_content_settings.images": 2}
+        # option.add_experimental_option("prefs", prefs)
+        # option.add_experimental_option('useAutomationExtension', False)
+        # option.add_experimental_option('excludeSwitches', ['enable-automation'])
+        # option.add_argument("--headless") #取消注释则以无界面形式启动
+        # self.browser = webdriver.Chrome('./chromedriver', options=option)
+
         self.myPool = redis.ConnectionPool(host='192.168.12.233', port=6379, db=2)
         self.rds = redis.Redis(connection_pool=self.myPool)
         self.items = []
@@ -57,6 +82,15 @@ class BaseCrawl():
         search_xpath = search_xpath
         self.default_handle = self.browser.current_window_handle
 
+        if self.name == 'jx_kjt':
+            for cancel in self.browser.find_elements_by_xpath(
+                    "//div[@id='roll']//img[@src='http://kjt.jiangxi.gov.cn/picture/721/2107231259311833586.gif']"):
+                time.sleep(2)
+                cancel.click()
+        if self.name == "gz_gzw":
+            for cancel in self.browser.find_elements_by_xpath('//*[@id="closepiaofu"]/a'):
+                cancel.click()
+
         for keyword in BaseCrawl.keywords[:]:
             # gz_kjt的弹窗
             if self.name == 'gz_kjt' and len(self.browser.find_elements_by_xpath("//div[@id='LAY_layuipro']")) > 0:
@@ -67,7 +101,10 @@ class BaseCrawl():
             input = self.get_element_by_xpath(input_xpath)
             input.click()
             input.clear()
-            input.click()
+            try:
+                input.click()
+            except:
+                pass
             input.send_keys(keyword)
             time.sleep(1)
             try:
@@ -78,6 +115,7 @@ class BaseCrawl():
             if wait_xp != "": # wait_xp 等待结果页面加载. 搜索结果不会新建窗口时使用
                 WebDriverWait(self.browser, self.timeout).until(EC.visibility_of_element_located(
                     (By.XPATH, wait_xp)))
+                time.sleep(1)
                 new_url = self.browser.current_url
                 self.browser.back()
                 time.sleep(1)
@@ -108,7 +146,6 @@ class BaseCrawl():
             self.rds.set(item['url'],1)
             self.rds.set(self.name +"."+ item['title'],1)
             res.append(item)
-            pass
         self.rds.close()
         return res
 
@@ -137,6 +174,7 @@ class BaseCrawl():
             return
         #
         has_next = True
+        cur = 1
         while (has_next):
             try:
                 WebDriverWait(self.browser, self.timeout).until(EC.visibility_of_element_located(
@@ -178,6 +216,9 @@ class BaseCrawl():
                         print(item)
 
             has_next = self.click_next(next_xp)
+            cur += 1
+            if cur > self.max_page:
+                break
 
 
     def time_select(self):

@@ -31,7 +31,7 @@ class GdGovSpider(scrapy.Spider, BaseCrawl):
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
-        self.waitor("//div[@class='total-line']")
+        self.waitor("//div[@class='list-part']")
         self.get_element_by_xpath("//div[@id='pos-list']/a[@key='all']").click()
         try:
             self.waitor("//div[@class='total-line']")

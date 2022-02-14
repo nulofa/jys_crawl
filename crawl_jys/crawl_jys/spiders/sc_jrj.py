@@ -49,6 +49,8 @@ class ScJrjSpider(scrapy.Spider, BaseCrawl):
     def click_next(self, next_xp):
         pre_of_next = self.get_element_by_xpath('//*[@id="pageInfo"]/li[last()-1]/a').text
         cur_page = self.get_element_by_xpath('//*[@id="pageInfo"]/li[@class="page active"]/a').text
+        if int(cur_page) > self.max_page:
+            return False
         flg = pre_of_next != cur_page
         self.get_element_by_xpath(next_xp).click()
         return flg

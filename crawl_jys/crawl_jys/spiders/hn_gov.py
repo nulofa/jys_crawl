@@ -5,8 +5,8 @@ from crawl_jys.BaseClass import BaseCrawl
 
 class HnGovSpider(scrapy.Spider, BaseCrawl):
     name = 'hn_gov'
-    start_urls = ['https://www.hainan.gov.cn/s?siteCode=4600000001&searchWord=%25E5%2586%259C%25E6%259D%2591%25E4%25BA%25A7%25E6%259D%2583&column=2675&wordPlace=0&orderBy=1&pageSize=10&pageNum=0&timeStamp=1&labelHN=&uc=0&checkHandle=1&strFileType=0&countKey=%200&sonSiteCode=&areaSearchFlag=-1&secondSearchWords=&left_right_flag=1']
-
+    start_urls = ['https://www.hainan.gov.cn/s?siteCode=4600000001&searchWord=']
+    max_page = 3
     def __init__(self):
         scrapy.Spider.__init__(self)
         BaseCrawl.__init__(self)
@@ -36,6 +36,8 @@ class HnGovSpider(scrapy.Spider, BaseCrawl):
     def click_next(self, next_xp):
         pre_of_next = self.get_element_by_xpath('//*[@id="pageInfo"]/li[last()-1]/a').text
         cur_page = self.get_element_by_xpath('//*[@id="pageInfo"]/li[@class="page active"]/a').text
+        if int(cur_page) >= self.max_page:
+            return False
         flg = pre_of_next != cur_page
         self.get_element_by_xpath(next_xp).click()
         return flg
