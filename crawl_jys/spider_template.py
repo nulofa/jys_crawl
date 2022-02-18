@@ -9,6 +9,10 @@ from scrapy import Request
 class %s(scrapy.Spider, BaseCrawl):
     name = '%s'
     start_urls = ['%s']
+    # custom_settings = {
+    #     'HEADLESS': False,
+    #     'IMAGELESS': True
+    # }
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -47,6 +51,7 @@ class %s(scrapy.Spider, BaseCrawl):
             self.browser.find_elements_by_xpath(time_xp)[-1].click()
             self.waitor(time_xp2)
         except:
+            time.sleep(2)
             self.browser.find_elements_by_xpath(time_xp)[-1].click()
             self.waitor(time_xp2)
         self.get_element_by_xpath(time_xp2).click()
@@ -57,8 +62,8 @@ class %s(scrapy.Spider, BaseCrawl):
         try:
             next = self.get_element_by_xpath(next_xp)
             if self.cur_page < self.max_page:
-                time.sleep(1+random.random())
                 next.click()
+                time.sleep(1+random.random())
                 self.cur_page += 1
             else:
                 self.cur_page = 1

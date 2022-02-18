@@ -15,6 +15,9 @@ SPIDER_MODULES = ['crawl_jys.spiders']
 NEWSPIDER_MODULE = 'crawl_jys.spiders'
 LOG_LEVEL = 'ERROR'
 
+HEADLESS = True
+IMAGELESS = True
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawl_jys (+http://www.yourdomain.com)'
 

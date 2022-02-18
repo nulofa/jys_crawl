@@ -6,8 +6,13 @@ from crawl_jys.BaseClass import BaseCrawl
 class CqGovSpider(scrapy.Spider, BaseCrawl):
     name = 'cq_gov'
     start_urls = ['http://www.cq.gov.cn']
-    max_page = 10
+    max_page = 3
     cur_page = 1
+
+    custom_settings = {
+        'HEADLESS': True,
+        'IMAGELESS': True
+    }
 
     def __init__(self):
         scrapy.Spider.__init__(self)

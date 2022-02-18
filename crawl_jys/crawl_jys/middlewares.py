@@ -113,19 +113,23 @@ class CrawlJysDownloaderMiddleware:
         spider.logger.info('Spider opened: %s' % spider.name)
 
 class SeleniumMiddleware():
-    def __init__(self, timeout=None, service_args=[]):
+    def __init__(self, Headless=True, Imageless=True, CssLess=True):
         self.logger = getLogger(__name__)
         profile = FirefoxProfile()
         profile.set_preference('devtools.jsonview.enabled', False)
         profile.set_preference("dom.webdriver.enabled", False)
         profile.set_preference('useAutomationExtension', False)
 
-        profile.set_preference('permissions.default.image', 2)
+        if Imageless:
+            profile.set_preference('permissions.default.image', 2)
+        if CssLess:
+            profile.set_preference('permissions.default.stylesheet', 2)
         profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
         # profile.set_preference('javascript.enabled', 'false')
         profile.update_preferences()
         options = webdriver.FirefoxOptions()
-        options.add_argument('-headless')     #取消注释则以无界面形式启动
+        if Headless:
+            options.add_argument('-headless')
         desired = DesiredCapabilities.FIREFOX
         self.browser = Firefox(firefox_profile=profile, desired_capabilities=desired,
                                executable_path='./geckodriver',
@@ -152,4 +156,4 @@ class SeleniumMiddleware():
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls()
+        return cls(crawler.settings.getbool('HEADLESS'), crawler.settings.getbool('IMAGELESS'))

@@ -6,6 +6,10 @@ from crawl_jys.BaseClass import BaseCrawl
 class GxGovSpider(scrapy.Spider, BaseCrawl):
     name = 'gx_gov'
     start_urls = ['http://www.gxzf.gov.cn']
+    # custom_settings = {
+    #     'HEADLESS': False,
+    #     'IMAGELESS': True
+    # }
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -33,7 +37,7 @@ class GxGovSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
         wait1_xp = "//div[@class='totolLi']"  # 等待结果出现
         time_xp = "//div[@class='el-date-editor el-range-editor el-input__inner el-date-editor--daterange el-range-editor--mini']" # 点击 时间选择器
-        time_xp2 = "//div[@class='el-picker-panel__body-wrapper']/div/button[last()]"  # 时间选择需要 两次点击才能确定
+        time_xp2 = "//div[@class='el-picker-panel__body-wrapper']/div/button[last()-1]"  # 时间选择需要 两次点击才能确定
         self.waitor(wait1_xp)
         self.browser.find_elements_by_xpath(time_xp)[-1].click()
         time.sleep(1)
@@ -41,6 +45,7 @@ class GxGovSpider(scrapy.Spider, BaseCrawl):
         time.sleep(1)
         # 点击按全文搜索
         self.browser.find_element_by_xpath("//li[@class='filterLi'][last()]/div/span[last()]").click()
+        time.sleep(1)
 
     def click_next(self, next_xp):
         has_next = True
