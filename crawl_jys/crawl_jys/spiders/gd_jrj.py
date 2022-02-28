@@ -1,4 +1,4 @@
-
+import random
 import time
 import scrapy
 from crawl_jys.BaseClass import BaseCrawl
@@ -6,6 +6,11 @@ from crawl_jys.BaseClass import BaseCrawl
 class GdJrjSpider(scrapy.Spider, BaseCrawl):
     name = 'gd_jrj'
     start_urls = ['http://www.gd.gov.cn']
+    timeout = 5
+    # custom_settings = {
+    #     'HEADLESS': False,
+    #     'IMAGELESS': True
+    # }
 
     def __init__(self):
         scrapy.Spider.__init__(self)
@@ -33,8 +38,13 @@ class GdJrjSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
         # 选择金融局
         self.waitor("//div[@class='list-part']")
-        self.get_element_by_xpath("//span[@id='pickRange']").click()
-        self.waitor("//div[@class='item-box']")
+        try:
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
+        except:
+            time.sleep(2)
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
         self.get_element_by_xpath("//div[@class='item-box']//div[@class='item-list']/span[@data-id='196']").click()
         try:
             self.waitor("//div[@class='total-line']")
@@ -42,7 +52,7 @@ class GdJrjSpider(scrapy.Spider, BaseCrawl):
             self.waitor("//div[@class='total-line']")
         except:
             return
-        self.get_element_by_xpath("//div[@id='time-list']/a[@key='year']").click()
+        self.get_element_by_xpath("//div[@id='time-list']/a[@key='month']").click()
 
     def click_next(self, next_xp):
         try:
@@ -51,6 +61,7 @@ class GdJrjSpider(scrapy.Spider, BaseCrawl):
             cur_page_ulr = cur_page.get_attribute("href")
             next_url = cur_page_ulr.replace("page=%s" % cur_page_num, "page=%s" % str(int(cur_page_num) + 1))
             self.browser.get(next_url)
+            time.sleep(1+random.random())
             return True
         except:
             return False

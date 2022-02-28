@@ -1,14 +1,13 @@
 
-template = '''
 import random
 import time
 import scrapy
 from crawl_jys.BaseClass import BaseCrawl
 from scrapy import Request
 
-class %s(scrapy.Spider, BaseCrawl):
-    name = '%s'
-    start_urls = ['%s']
+class ZgKjbSpider(scrapy.Spider, BaseCrawl):
+    name = 'zg_kjb'
+    start_urls = ['http://www.most.gov.cn/index.html']
     # custom_settings = {
     #     'HEADLESS': False,
     #     'IMAGELESS': True
@@ -24,28 +23,28 @@ class %s(scrapy.Spider, BaseCrawl):
         yield Request(url=self.start_urls[0], callback=self.parse, dont_filter=True)
 
     def parse(self, response):
-        input_xpath = ""
-        search_xpath = ""
-        items = super(%s, self).myParse(response, input_xpath, search_xpath)
+        input_xpath = '//*[@id="searchword"]'
+        search_xpath = '//*[@id="header-title-search-btn"]/a'
+        items = super(ZgKjbSpider, self).myParse(response, input_xpath, search_xpath)
         for item in items:
             yield item
 
     def myGetData(self, keyword):
-        wait2_xp = ""  # 等待第一页搜索结果的出现, 无特殊情况可设置与news_xp一样
-        wait3_xp = ""  # 等待每一页的搜索结果的出现, 无特殊情况可设置与news_xp一样
-        news_xp = ""
-        date_xp = ""
-        content_xp = ""
-        title_xp = ""
-        url_xp = ""
-        next_xp = ""
-        super(%s, self).get_data(keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp,
+        wait2_xp = '//*[@id="content"]/li'  # 等待第一页搜索结果的出现, 无特殊情况可设置与news_xp一样
+        wait3_xp = '//*[@id="content"]/li'  # 等待每一页的搜索结果的出现, 无特殊情况可设置与news_xp一样
+        news_xp = '//*[@id="content"]/li'
+        date_xp = ".//p[@class='artile-time']"
+        content_xp = ".//p[@class='artile-info']"
+        title_xp = "./a/h2"
+        url_xp = "./a"
+        next_xp = '//*[@id="page_jiansuo"]/a[last()-1]'
+        super(ZgKjbSpider, self).get_data(keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp,
                                           title_xp, url_xp, next_xp)
 
     def time_select(self):
-        wait1_xp = ""  # 等待《时间选择器》的出现
-        time_xp = "" # 点击 时间选择器
-        time_xp2 = ""  # 时间选择需要 两次点击才能确定
+        wait1_xp = '//*[@id="alllist"]/div[1]'  # 等待《时间选择器》的出现
+        time_xp = '//*[@id="alllist"]/div[1]/span[@class="control-box-time"]' # 点击 时间选择器
+        time_xp2 = '//*[@id="alllist"]/div[1]/div[@class="time-box"]/span[last()-1]'  # 时间选择需要 两次点击才能确定
         self.waitor(wait1_xp)
         try:
             self.browser.find_elements_by_xpath(time_xp)[-1].click()
@@ -69,7 +68,7 @@ class %s(scrapy.Spider, BaseCrawl):
                 self.cur_page = 1
                 return False
         except Exception as e:
-            print("点击下一页发生错误: \\n", e)
+            print("点击下一页发生错误: \n", e)
             self.cur_page = 1
             has_next = False
         return has_next
@@ -77,21 +76,9 @@ class %s(scrapy.Spider, BaseCrawl):
     def process_item(self, new, item, title_xp, url_xp):
         item['title'] = new.find_element_by_xpath(title_xp).get_attribute("title")
         item['url'] = new.find_element_by_xpath(url_xp).get_attribute("href")
-        item['source'] = 'xxx'  #需要修改为当前的网站名，如：广东发改委
+        item['source'] = '中国科技部'  #需要修改为当前的网站名，如：广东发改委
 
     def process_date(self, new, date_xp): # 返回[年，月，日]，如: 2021-12-12 则返回[2012,12,12]
         date_text = new.find_elements_by_xpath(date_xp)[0].text
-        return date_text.split("-")
+        return date_text.split(".")
 
-'''
-
-import sys
-
-if __name__ == '__main__':
-    assert len(sys.argv) == 3
-    name = sys.argv[1]
-    url = sys.argv[2]
-    className= "".join([ss.capitalize() for ss in name.split("_")])+"Spider"
-    spider_tempate = template % (className, name, url, className, className)
-    with open("crawl_jys/spiders/%s.py"%name, 'w', encoding="utf-8") as f:
-        f.write(spider_tempate)

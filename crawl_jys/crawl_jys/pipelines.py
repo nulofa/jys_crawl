@@ -20,7 +20,8 @@ class CrawlJysPipeline:
     def process_item(self, item, spider):
         print("mysql: item = ", item)
         crawl_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        insert_sql = 'insert into message values(null, "%s","%s", "%s", "%s", "%s", "%s", "%s")'\
+        insert_sql = 'insert into message(id, date, source, keyword, title, content, url, crawl_time) ' \
+                     'values(null, "%s","%s", "%s", "%s", "%s", "%s", "%s")'\
                      % (item['date'],item['source'],item['keyword'], item['title'], item['content'], item['url'], crawl_time)
         try:
             with self.conn.cursor() as cursor:

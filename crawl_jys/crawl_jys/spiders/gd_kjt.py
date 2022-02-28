@@ -33,8 +33,13 @@ class GdKjtSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
         # 选择科技厅
         self.waitor("//div[@class='list-part']")
-        self.get_element_by_xpath("//span[@id='pickRange']").click()
-        self.waitor("//div[@class='item-box']")
+        try:
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
+        except:
+            time.sleep(2)
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
         self.get_element_by_xpath("//div[@class='item-box']//div[@class='item-list']/span[@data-id='172']").click()
         try:
             self.waitor("//div[@class='total-line']")

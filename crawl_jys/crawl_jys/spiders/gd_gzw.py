@@ -33,8 +33,13 @@ class GdGzwSpider(scrapy.Spider, BaseCrawl):
     def time_select(self):
         # 选择国资委 金融196，科技厅172
         self.waitor("//div[@class='list-part']")
-        self.get_element_by_xpath("//span[@id='pickRange']").click()
-        self.waitor("//div[@class='item-box']")
+        try:
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
+        except:
+            time.sleep(2)
+            self.get_element_by_xpath("//span[@id='pickRange']").click()
+            self.waitor("//div[@class='item-box']")
         self.get_element_by_xpath("//div[@class='item-box']//div[@class='item-list']/span[@data-id='195']").click()
         try:
             self.waitor("//div[@class='total-line']")

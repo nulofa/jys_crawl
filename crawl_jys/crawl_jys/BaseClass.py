@@ -13,9 +13,9 @@ from crawl_jys.items import CrawlJysItem
 
 class BaseCrawl():
     keywords = ["农村产权流转交易", "文化产权", "碳排放权交易","知识产权交易", "数据交易","技术交易","交易场所", "金融资产交易","区域股权","要素市场","产权交易"]
-    date_limit = 60
+    date_limit = 30
     max_page = 3
-    timeout = 7
+    timeout = 3
     browser = None
     # def myGet(self, url):
     #     self.browser.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
@@ -91,6 +91,10 @@ class BaseCrawl():
             for cancel in self.browser.find_elements_by_xpath('//*[@id="closepiaofu"]/a'):
                 cancel.click()
 
+        if self.name == 'sd_kjt':
+            for cancel in self.browser.find_elements_by_xpath('//*[@id="close2"]'):
+                cancel.click()
+
         for keyword in BaseCrawl.keywords[:]:
             # gz_kjt的弹窗
             if self.name == 'gz_kjt' and len(self.browser.find_elements_by_xpath("//div[@id='LAY_layuipro']")) > 0:
@@ -153,6 +157,12 @@ class BaseCrawl():
         pass
 
     def get_data(self, keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp, title_xp, url_xp, next_xp, block_xp=""):
+        if self.name == 'nx_kjt':
+            try:
+                self.browser.switch_to.frame("searchjsp")
+            except:
+                print("没有iframe")
+                return
         self.time_select()
         thred = datetime.date.today() - datetime.timedelta(BaseCrawl.date_limit)
         if len(news_xp) == 2: # for 上海变化的xp
@@ -200,7 +210,7 @@ class BaseCrawl():
                 nDate = datetime.date(news_date[0], news_date[1], news_date[2])
                 if nDate >= thred:
 
-                    if self.name == 'xhs': # 新华社的进行特殊处理
+                    if self.name == 'xhs' or self.name == 'qh_gzw': # 新华社的进行特殊处理
                         self.special_process(keyword, new,content_xp, url_xp,title_xp, nDate)
                         continue
                     else:

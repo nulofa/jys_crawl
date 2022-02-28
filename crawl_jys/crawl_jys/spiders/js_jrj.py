@@ -51,7 +51,7 @@ class JsJrjSpider(scrapy.Spider, BaseCrawl):
             time.sleep(2 + random.random())
             ActionChains(self.browser).move_to_element(self.get_element_by_xpath(time_xp)).perform()
             self.waitor(time_xp2)
-        self.get_element_by_xpath(time_xp2).click()
+        ActionChains(self.browser).click(self.get_element_by_xpath(time_xp2)).perform()
         time.sleep(1)
 
     def click_next(self, next_xp):

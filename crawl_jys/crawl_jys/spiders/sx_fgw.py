@@ -5,11 +5,11 @@ import scrapy
 from crawl_jys.BaseClass import BaseCrawl
 from scrapy import Request
 
-class NmgFgwSpider(scrapy.Spider, BaseCrawl):
-    name = 'nmg_fgw'
-    start_urls = ['http://fgw.nmg.gov.cn']
+class SxFgwSpider(scrapy.Spider, BaseCrawl):
+    name = 'sx_fgw'
+    start_urls = ['http://fgw.shanxi.gov.cn']
     # custom_settings = {
-    #     'HEADLESS': True,
+    #     'HEADLESS': False,
     #     'IMAGELESS': True
     # }
 
@@ -23,9 +23,9 @@ class NmgFgwSpider(scrapy.Spider, BaseCrawl):
         yield Request(url=self.start_urls[0], callback=self.parse, dont_filter=True)
 
     def parse(self, response):
-        input_xpath = '//*[@id="keywords"]'
-        search_xpath = '//*[@id="submit_btn"]'
-        items = super(NmgFgwSpider, self).myParse(response, input_xpath, search_xpath)
+        input_xpath = '//*[@id="检索列表"]'
+        search_xpath = '//*[@id="outlinesearchform"]/label[2]/input'
+        items = super(SxFgwSpider, self).myParse(response, input_xpath, search_xpath)
         for item in items:
             yield item
 
@@ -38,7 +38,7 @@ class NmgFgwSpider(scrapy.Spider, BaseCrawl):
         title_xp = ".//div[@class='title']/a"
         url_xp = ".//div[@class='title']/a"
         next_xp = "//div[@class='el-pagination']//button[@class='btn-next']"
-        super(NmgFgwSpider, self).get_data(keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp,
+        super(SxFgwSpider, self).get_data(keyword, wait2_xp, wait3_xp, news_xp, date_xp, content_xp,
                                            title_xp, url_xp, next_xp)
 
     def time_select(self):
@@ -64,7 +64,6 @@ class NmgFgwSpider(scrapy.Spider, BaseCrawl):
             next = self.get_element_by_xpath(next_xp)
             if self.cur_page < self.max_page:
                 next.click()
-                self.waitor2("//div[@class='el-loading-mask']")
                 time.sleep(1 + random.random())
                 self.cur_page += 1
             else:
@@ -79,11 +78,11 @@ class NmgFgwSpider(scrapy.Spider, BaseCrawl):
     def process_item(self, new, item, title_xp, url_xp):
         item['title'] = new.find_element_by_xpath(title_xp).text
         item['url'] = new.find_element_by_xpath(url_xp).get_attribute("href")
-        item['source'] = '内蒙古发改委'  #需要修改为当前的网站名，如：广东发改委
+        item['source'] = '山西发改委'  # 需要修改为当前的网站名，如：广东发改委
 
-    def process_date(self, new, date_xp): # 返回[年，月，日]，如: 2021-12-12 则返回[2012,12,12]
+    def process_date(self, new, date_xp):  # 返回[年，月，日]，如: 2021-12-12 则返回[2012,12,12]
         date_text = new.find_elements_by_xpath(date_xp)[0].text
-        if (date_text.strip() == ''):
-            return ['1970','1', '1']
+        if (date_text.strip() == '' or len(new.find_elements_by_xpath(".//div[@class='content']"))==0):
+            return ['1970', '1', '1']
         return date_text.split("-")
 

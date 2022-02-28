@@ -9,12 +9,12 @@ if __name__ == '__main__':
     skips = {'gx_gzw.py','zg_czb.py', "gx_fgw.py"}
 
     print(len(spiders))
-    for spider in spiders[2:]:
-        if spider.startswith("js") or spider.startswith("hunan") or spider.startswith("hb"):
-            print(spider)
-            continue
-        if spider != 'gx_gov.py':
-            continue
+    for spider in spiders[:]:
+        # if spider.startswith("henan") or spider.startswith("bj") or spider.startswith("qh") or spider.startswith('gs'):
+        #     print(spider)
+        #     continue
+        # if spider != 'gd_jrj.py':
+        #     continue
         start = time.time()
         if spider.startswith("__") or spider in skips:
             continue
